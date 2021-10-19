@@ -9,6 +9,7 @@ import Button from "./UI/button/Button";
 import Input from "./UI/input/Input";
 import PostForm from "./components/PostForm";
 import Select from "./UI/select/Select";
+import PostFilter from "./components/PostFilter";
 
 function App() {
    const [posts, setPosts] = useState([
@@ -17,16 +18,19 @@ function App() {
        {id: 3, title: "Java", body:"For server"},
        {id: 4, title: "C", body:"For server"},
    ]);
-   const [sortPosts, setSortPosts] = useState("");
-   const [searchQuery, setSearchQuery] = useState("");
-   
+   const [filter, setFilter] = useState({sort: "", query: "" })
+
    const searchPosts = useMemo(() => {
        console.log("Worked function selectedPost")
-       if(sortPosts) {
-           return [...posts].sort((a, b) => a[sortPosts].localeCompare(b[sortPosts]));
+       if(filter.sort) {
+           return [...posts].sort((a, b) => a[filter.sort].localeCompare(b[filter.sort]));
        }
        return posts;
-   }, [sortPosts, posts]);
+   }, [filter.sort, posts]);
+
+   const sortAndSearchedPosts = useMemo(() => {
+       return searchPosts.filter((post) => post.title.toLowerCase().includes(filter.query.toLowerCase()))
+   }, [filter.query, searchPosts]);
 
    const createNewPost = (newPost) => {
        setPosts([...posts, newPost]);
@@ -34,29 +38,17 @@ function App() {
    const removePost = (post) => {
        setPosts(posts.filter(p => p.id !== post.id))
    }
-   const sortPost = (sort) => {
-       setSortPosts(sort);
-   }
+
   return (
     <div className="App">
         <PostForm create={createNewPost} />
         <hr style={{margin: "15px 0", color: "teal"}}/>
-        <input
-            type="text"
-            value={searchQuery}
-            onChange={event => setSearchQuery(event.target.value)}
+        <PostFilter
+            filter={filter}
+            setFilter={setFilter}
         />
-        <Select
-            value={sortPosts}
-            onChange={sortPost}
-            defaultOptions="Sort by"
-            options={[
-                {value: "title", name: "Sort by name"},
-                {value: "body", name: "Sort by description"}
-            ]}
-        />
-        {posts.length !== 0
-            ? <PostsList remove={removePost} posts={searchPosts}/>
+        {sortAndSearchedPosts.length !== 0
+            ? <PostsList remove={removePost} posts={sortAndSearchedPosts}/>
             : <h1>Posts not found</h1>
         }
     </div>
