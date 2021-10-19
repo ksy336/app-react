@@ -1,6 +1,6 @@
 
 import './App.css';
-import React, {useRef, useState} from "react";
+import React, {useMemo, useRef, useState} from "react";
 import Counter from "./components/Counter";
 import ClassCounter from "./components/ClassCounter";
 import PostItem from "./components/PostItem";
@@ -18,6 +18,15 @@ function App() {
        {id: 4, title: "C", body:"For server"},
    ]);
    const [sortPosts, setSortPosts] = useState("");
+   const [searchQuery, setSearchQuery] = useState("");
+   
+   const searchPosts = useMemo(() => {
+       console.log("Worked function selectedPost")
+       if(sortPosts) {
+           return [...posts].sort((a, b) => a[sortPosts].localeCompare(b[sortPosts]));
+       }
+       return posts;
+   }, [sortPosts, posts]);
 
    const createNewPost = (newPost) => {
        setPosts([...posts, newPost]);
@@ -27,12 +36,16 @@ function App() {
    }
    const sortPost = (sort) => {
        setSortPosts(sort);
-       setPosts([...posts].sort((a, b) => a[sort].localeCompare(b[sort])));
    }
   return (
     <div className="App">
         <PostForm create={createNewPost} />
         <hr style={{margin: "15px 0", color: "teal"}}/>
+        <input
+            type="text"
+            value={searchQuery}
+            onChange={event => setSearchQuery(event.target.value)}
+        />
         <Select
             value={sortPosts}
             onChange={sortPost}
@@ -43,7 +56,7 @@ function App() {
             ]}
         />
         {posts.length !== 0
-            ? <PostsList remove={removePost} posts={posts}/>
+            ? <PostsList remove={removePost} posts={searchPosts}/>
             : <h1>Posts not found</h1>
         }
     </div>
