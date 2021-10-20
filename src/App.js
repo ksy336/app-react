@@ -1,6 +1,6 @@
 
 import './App.css';
-import React, {useMemo, useRef, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import Counter from "./components/Counter";
 import ClassCounter from "./components/ClassCounter";
 import PostItem from "./components/PostItem";
@@ -12,6 +12,8 @@ import Select from "./UI/select/Select";
 import PostFilter from "./components/PostFilter";
 import Modal from "./UI/modal/Modal";
 import {usePosts} from "./hooks/usePosts";
+import axios from "axios";
+import PostService from "./API/PostService/PostService";
 
 function App() {
    const [posts, setPosts] = useState([]);
@@ -26,8 +28,17 @@ function App() {
        setPosts(posts.filter(p => p.id !== post.id))
    }
 
+   async function fetchPosts() {
+       const posts = await PostService.getAll();
+      setPosts(posts);
+   }
+    useEffect(() => {
+       fetchPosts();
+    }, [])
+
   return (
     <div className="App">
+        <button onClick={fetchPosts}>Get posts</button>
         <Button
             style={{marginTop: "30px"}}
             onClick={() => setModal(true)}> Create Post </Button>
