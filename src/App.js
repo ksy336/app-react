@@ -14,12 +14,17 @@ import Modal from "./UI/modal/Modal";
 import {usePosts} from "./hooks/usePosts";
 import axios from "axios";
 import PostService from "./API/PostService/PostService";
+import {getPageCount, getPages} from "./utils/page";
+import Pagination from "./UI/pagination/pagination";
 
 function App() {
    const [posts, setPosts] = useState([]);
    const [filter, setFilter] = useState({sort: "", query: "" });
    const [modal, setModal] = useState(false);
    const sortAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
+   const [totalPages, setTotalPages] = useState(0);
+   const [limit, setLimit] = useState(10);
+   const [page, setPage] = useState(1);
 
    const createNewPost = (newPost) => {
        setPosts([...posts, newPost]);
@@ -29,13 +34,19 @@ function App() {
    }
 
    async function fetchPosts() {
-       const posts = await PostService.getAll();
-      setPosts(posts);
+       const response = await PostService.getAll(limit, page);
+       setPosts(response.data);
+       const totalCount = response.headers['x-total-count'];
+       setTotalPages(getPageCount(totalCount, limit));
    }
+
     useEffect(() => {
        fetchPosts();
-    }, [])
+    }, [page])
 
+    const getMorePosts = (page) => {
+      setPage(page);
+    }
   return (
     <div className="App">
         <button onClick={fetchPosts}>Get posts</button>
@@ -54,6 +65,10 @@ function App() {
             setFilter={setFilter}
         />
         <PostsList remove={removePost} posts={sortAndSearchedPosts} />
+        <Pagination
+            page={page}
+            totalPages={totalPages}
+            getMorePosts={getMorePosts}/>
     </div>
   );
 }
