@@ -1,76 +1,29 @@
 
 import './App.css';
 import React, {useEffect, useMemo, useRef, useState} from "react";
-import Counter from "./components/Counter";
-import ClassCounter from "./components/ClassCounter";
-import PostItem from "./components/PostItem";
-import PostsList from "./components/PostsList";
-import Button from "./UI/button/Button";
-import Input from "./UI/input/Input";
-import PostForm from "./components/PostForm";
-import Select from "./UI/select/Select";
-import PostFilter from "./components/PostFilter";
-import Modal from "./UI/modal/Modal";
-import {usePosts} from "./hooks/usePosts";
-import axios from "axios";
-import PostService from "./API/PostService/PostService";
-import {getPageCount, getPages} from "./utils/page";
-import Pagination from "./UI/pagination/pagination";
+import {BrowserRouter, Route, Switch, Redirect} from "react-router-dom";
+import About from "./pages/About";
+import Posts from "./pages/Posts";
+import Navbar from "./UI/navbar/Navbar";
 
 function App() {
-   const [posts, setPosts] = useState([]);
-   const [filter, setFilter] = useState({sort: "", query: "" });
-   const [modal, setModal] = useState(false);
-   const sortAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
-   const [totalPages, setTotalPages] = useState(0);
-   const [limit, setLimit] = useState(10);
-   const [page, setPage] = useState(1);
+    return (
+        <div>
+            <BrowserRouter>
+                <Navbar />
+                <Switch>
+                    <Route path={"/about"}>
+                        <About />
+                    </Route>
+                    <Route path={"/posts"}>
+                        <Posts />
+                    </Route>
+                    <Redirect to="/posts" />
+                </Switch>
 
-   const createNewPost = (newPost) => {
-       setPosts([...posts, newPost]);
-   }
-   const removePost = (post) => {
-       setPosts(posts.filter(p => p.id !== post.id))
-   }
-
-   async function fetchPosts() {
-       const response = await PostService.getAll(limit, page);
-       setPosts(response.data);
-       const totalCount = response.headers['x-total-count'];
-       setTotalPages(getPageCount(totalCount, limit));
-   }
-
-    useEffect(() => {
-       fetchPosts();
-    }, [page])
-
-    const getMorePosts = (page) => {
-      setPage(page);
-    }
-  return (
-    <div className="App">
-        <button onClick={fetchPosts}>Get posts</button>
-        <Button
-            style={{marginTop: "30px"}}
-            onClick={() => setModal(true)}> Create Post </Button>
-        <Modal
-            visible={modal}
-            setVisible={setModal}
-            >
-            <PostForm create={createNewPost} />
-        </Modal>
-        <hr style={{margin: "15px 0", color: "teal"}}/>
-        <PostFilter
-            filter={filter}
-            setFilter={setFilter}
-        />
-        <PostsList remove={removePost} posts={sortAndSearchedPosts} />
-        <Pagination
-            page={page}
-            totalPages={totalPages}
-            getMorePosts={getMorePosts}/>
-    </div>
-  );
+            </BrowserRouter>
+        </div>
+    )
 }
 
 export default App;
