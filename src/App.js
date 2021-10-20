@@ -10,27 +10,14 @@ import Input from "./UI/input/Input";
 import PostForm from "./components/PostForm";
 import Select from "./UI/select/Select";
 import PostFilter from "./components/PostFilter";
+import Modal from "./UI/modal/Modal";
+import {usePosts} from "./hooks/usePosts";
 
 function App() {
-   const [posts, setPosts] = useState([
-       {id: 1, title: "Python", body:"Server language"},
-       {id: 2, title: "Javascript", body:"browser language"},
-       {id: 3, title: "Java", body:"For server"},
-       {id: 4, title: "C", body:"For server"},
-   ]);
-   const [filter, setFilter] = useState({sort: "", query: "" })
-
-   const searchPosts = useMemo(() => {
-       console.log("Worked function selectedPost")
-       if(filter.sort) {
-           return [...posts].sort((a, b) => a[filter.sort].localeCompare(b[filter.sort]));
-       }
-       return posts;
-   }, [filter.sort, posts]);
-
-   const sortAndSearchedPosts = useMemo(() => {
-       return searchPosts.filter((post) => post.title.toLowerCase().includes(filter.query.toLowerCase()))
-   }, [filter.query, searchPosts]);
+   const [posts, setPosts] = useState([]);
+   const [filter, setFilter] = useState({sort: "", query: "" });
+   const [modal, setModal] = useState(false);
+   const sortAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
 
    const createNewPost = (newPost) => {
        setPosts([...posts, newPost]);
@@ -41,16 +28,21 @@ function App() {
 
   return (
     <div className="App">
-        <PostForm create={createNewPost} />
+        <Button
+            style={{marginTop: "30px"}}
+            onClick={() => setModal(true)}> Create Post </Button>
+        <Modal
+            visible={modal}
+            setVisible={setModal}
+            >
+            <PostForm create={createNewPost} />
+        </Modal>
         <hr style={{margin: "15px 0", color: "teal"}}/>
         <PostFilter
             filter={filter}
             setFilter={setFilter}
         />
-        {sortAndSearchedPosts.length !== 0
-            ? <PostsList remove={removePost} posts={sortAndSearchedPosts}/>
-            : <h1>Posts not found</h1>
-        }
+        <PostsList remove={removePost} posts={sortAndSearchedPosts} />
     </div>
   );
 }
