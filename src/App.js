@@ -2,26 +2,24 @@
 import './App.css';
 import React, {useEffect, useMemo, useRef, useState} from "react";
 import {BrowserRouter, Route, Switch, Redirect} from "react-router-dom";
-import About from "./pages/About";
-import Posts from "./pages/Posts";
 import Navbar from "./UI/navbar/Navbar";
+import AppRouter from "./components/AppRouter";
+import {AuthContext} from "./context/context";
 
 function App() {
+    const [isAuth, setIsAuth] = useState(false);
     return (
         <div>
-            <BrowserRouter>
-                <Navbar />
-                <Switch>
-                    <Route path={"/about"}>
-                        <About />
-                    </Route>
-                    <Route path={"/posts"}>
-                        <Posts />
-                    </Route>
-                    <Redirect to="/posts" />
-                </Switch>
-
-            </BrowserRouter>
+            <AuthContext.Provider value={{
+                isAuth,
+                setIsAuth
+            }}
+            >
+                <BrowserRouter>
+                    <Navbar />
+                    <AppRouter />
+                </BrowserRouter>
+            </AuthContext.Provider>
         </div>
     )
 }

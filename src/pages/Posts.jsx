@@ -19,6 +19,9 @@ function Posts() {
     const [totalPages, setTotalPages] = useState(0);
     const [limit, setLimit] = useState(10);
     const [page, setPage] = useState(1);
+    const lastElement = useRef();
+    const observer = useRef();
+    console.log(lastElement);
 
     const createNewPost = (newPost) => {
         setPosts([...posts, newPost]);
@@ -41,6 +44,21 @@ function Posts() {
     const getMorePosts = (page) => {
         setPage(page);
     }
+
+    useEffect(() => {
+        if(observer.current) observer.current.disconnect();
+        var callback = function(entries, observer) {
+            if(entries[0].isIntersecting && page < totalPages) {
+                console.log(page);
+                setPage(page + 1);
+            }
+            console.log(entries)
+            console.log("Div is here")
+        };
+        observer.current = new IntersectionObserver(callback);
+        observer.current.observe(lastElement.current);
+    }, []);
+
     return (
         <div className="App">
             <button onClick={fetchPosts}>Get posts</button>
@@ -58,7 +76,8 @@ function Posts() {
                 filter={filter}
                 setFilter={setFilter}
             />
-            <PostsList remove={removePost} posts={sortAndSearchedPosts} />
+            <PostsList remove={removePost} posts={sortAndSearchedPosts} title= "Posts about js" />
+            <div ref={lastElement} style={{height: "30px", background: "red"}}/>
             <Pagination
                 page={page}
                 totalPages={totalPages}
